@@ -7,22 +7,28 @@ stateNum = 6;
 % Note: the experimental data: time: 1st column.
 %                              green: 2nd column
 %                              red: 3rd column
-%                              blue: 4th column 
+%                              blue: 4th column
 % NOTE!: the paper shows blue before red color!
 
-% read the data
-filename = 'hel3_trace_9.dat';
-data = readmatrix(filename);
-time = data(:,1)'; % time step is 0.05 s 
-time = time - time(1);
-ydata = data(:,2:4)'; 
-ydata(2,:) = data(:,4)'; ydata(3,:) = data(:,3)'; 
-% now, the 1 row of ydata is green, 2 row is blue, and 3 row is red!
+% list of data files to train on
+filenames = {'hel3_trace_9.dat'};
 
-% normalize 
-ydata(1,:) = ydata(1,:) / max(ydata(1,:));
-ydata(2,:) = ydata(2,:) / max(ydata(2,:));
-ydata(3,:) = ydata(3,:) / max(ydata(3,:));
+% read all traces into cell arrays
+ydataAll = cell(1, length(filenames));
+timeAll  = cell(1, length(filenames));
+for f = 1:length(filenames)
+    data = readmatrix(filenames{f});
+    t = data(:,1)';
+    t = t - t(1);
+    timeAll{f} = t;
+    yd = data(:,2:4)';
+    yd(2,:) = data(:,4)'; yd(3,:) = data(:,3)';
+    % now, the 1 row of yd is green, 2 row is blue, and 3 row is red!
+    yd(1,:) = yd(1,:) / max(yd(1,:));
+    yd(2,:) = yd(2,:) / max(yd(2,:));
+    yd(3,:) = yd(3,:) / max(yd(3,:));
+    ydataAll{f} = yd;
+end
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -37,14 +43,14 @@ sigmab = [0.15, 0.18, 0.10];
 sigmar = [0.12, 0.17, 0.10];
 
 % build the system states according to the couplings between states
-stateindex = [3 1 2 2 2 1  
+stateindex = [3 1 2 2 2 1
               3 3 1 2 3 3
-              3 3 3 2 1 3]; 
+              3 3 3 2 1 3];
 u = zeros(3,stateNum);
 u = build_states_from_stateindex(stateindex, ug, ub, ur);
 
 sigma2 = zeros(3,3,stateNum);
-for i = 1:stateNum  
+for i = 1:stateNum
     a1 = sigmag(stateindex(1,i));
     a2 = sigmab(stateindex(2,i));
     a3 = sigmar(stateindex(3,i));
@@ -67,119 +73,114 @@ A =[0.9396, 0.0001, 0.0108, 0.0495, 0.0001, 0.0001
 % Expection-Maximization Algorithm
 PI  = ones(1,stateNum) / stateNum; % imission prob at t=0
 
-[u, sigma2, A, ProbMax, PI] = expectationMaximization_Algorithm(stateindex, u, sigma2, PI, A, ydata);
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Vertibi to sovle the state sequence
-[stateSequenceFinal, probMax, probSequenceFinal] = stateSequence_Viterbi_Algorithm(ydata, u, sigma2, A, PI);
+[u, sigma2, A, ProbMax, PI] = expectationMaximization_Algorithm(stateindex, u, sigma2, PI, A, ydataAll);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % plot figures
-% plot the likehood 
+% plot the likehood
 plot(ProbMax,'-b','linewidth',2)
 xlabel('EM Iterations');
 ylabel('Likelihood');
-ylim([0,1]);
 set(gca,'linewidth', 2,'fontsize',20,'fontname','Times New Roman');
-set(gcf,'unit','centimeters','position',[10 6 20 13]); 
+set(gcf,'unit','centimeters','position',[10 6 20 13]);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% plot the fitted curve
-figure
-t = tiledlayout(3,1);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Viterbi and output per trace
+for f = 1:length(filenames)
+    ydata = ydataAll{f};
+    time  = timeAll{f};
+    filename = filenames{f};
 
-% original data
-ax1 = nexttile;
-plot(time, ydata(1,:),'-go','markersize',5,'linewidth',2)
-hold on
-plot(time, ydata(2,:),'-bs','markersize',5,'linewidth',2)
-plot(time, ydata(3,:),'-rs','markersize',5,'linewidth',2)
-ylabel('FRET');
-%ylim([-0.2,1]);
-yticks(-0.2:0.2:1);
-set(gca,'linewidth', 2,'fontsize',20,'fontname','Times New Roman');
+    % Vertibi to solve the state sequence
+    [stateSequenceFinal, probMax, probSequenceFinal] = stateSequence_Viterbi_Algorithm(ydata, u, sigma2, A, PI);
 
-% fitted FRET 
-ax2 = nexttile;
-yfit = zeros(3, size(ydata,2));
-for i = 1:size(ydata,2)
-    stateIndex = stateSequenceFinal(i);
-    yfit(1,i) = u(1,stateIndex);
-    yfit(2,i) = u(2,stateIndex);
-    yfit(3,i) = u(3,stateIndex);
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % plot the fitted curve
+    figure
+    t = tiledlayout(3,1);
+
+    % original data
+    ax1 = nexttile;
+    plot(time, ydata(1,:),'-go','markersize',5,'linewidth',2)
+    hold on
+    plot(time, ydata(2,:),'-bs','markersize',5,'linewidth',2)
+    plot(time, ydata(3,:),'-rs','markersize',5,'linewidth',2)
+    ylabel('FRET');
+    yticks(-0.2:0.2:1);
+    set(gca,'linewidth', 2,'fontsize',20,'fontname','Times New Roman');
+
+    % fitted FRET
+    ax2 = nexttile;
+    yfit = zeros(3, size(ydata,2));
+    for i = 1:size(ydata,2)
+        stateIndex = stateSequenceFinal(i);
+        yfit(1,i) = u(1,stateIndex);
+        yfit(2,i) = u(2,stateIndex);
+        yfit(3,i) = u(3,stateIndex);
+    end
+    plot(time, yfit(1,:),'g','linewidth',2)
+    hold on
+    plot(time, yfit(2,:),'b','linewidth',2)
+    plot(time, yfit(3,:),'r','linewidth',2)
+    ylabel('Fitted-FRET');
+    ylim([-0.2,1]);
+    yticks(-0.2:0.2:1);
+    set(gca,'linewidth', 2,'fontsize',20,'fontname','Times New Roman');
+
+    % state sequence
+    ax3 = nexttile;
+    newStateSequence = [];
+    newProbSequence = [];
+    newTime = [];
+    for i = 1:length(time)
+        stateIndex = stateSequenceFinal(i);
+        tmpState = [stateIndex, stateIndex, stateIndex];
+        newStateSequence = [newStateSequence, tmpState];
+
+        prob = probSequenceFinal(i);
+        tmpProb = [prob, prob, prob];
+        newProbSequence = [newProbSequence, tmpProb];
+
+        tmpTime = [time(i)-0.05/3, time(i), time(i)+0.05/3]; % 0.05s is the original time step
+        newTime = [newTime, tmpTime];
+    end
+    newStateSequence = newStateSequence - 1;
+    plot(newTime,newStateSequence,'-k','linewidth',2)
+
+    ylabel('State Index');
+    ylim([-0.5,5.5]);
+    yticks(0:1:5);
+    set(gca,'linewidth', 2,'fontsize',20,'fontname','Times New Roman');
+
+    linkaxes([ax1,ax2,ax3],'x');
+    xlabel(t,'Time Step','fontsize',20,'fontname','Times New Roman')
+    xticklabels(ax1,{})
+    xticklabels(ax2,{})
+    t.TileSpacing = 'compact';
+    t.Padding = 'compact';
+    set(gcf,'unit','centimeters','position',[10 6 40 30]);
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % output data into files
+    foldername = filename(1:(length(filename)-4));
+    mkdir(foldername)
+    cd(foldername)
+
+    originalData = [time; ydata];
+    writematrix(originalData,'originalData.txt')
+
+    fittedData = [time; yfit];
+    writematrix(fittedData,'fittedData.txt')
+
+    stateSequence = [newTime; newStateSequence];
+    writematrix(stateSequence,'stateSequence.txt')
+    writematrix(newProbSequence,'probSequence.txt')
+
+    writematrix(u,'systemStateFRET.txt')
+    writematrix(sigma2,'systemStateCovariance.txt')
+    writematrix(A,'transitionProbability.txt')
+
+    cd ..
 end
-plot(time, yfit(1,:),'g','linewidth',2)
-hold on
-plot(time, yfit(2,:),'b','linewidth',2)
-plot(time, yfit(3,:),'r','linewidth',2)
-ylabel('Fitted-FRET');
-ylim([-0.2,1]);
-yticks(-0.2:0.2:1);
-set(gca,'linewidth', 2,'fontsize',20,'fontname','Times New Roman');
-
-% state sequence
-ax3 = nexttile;
-% add dots for state index, just for clear show of each state point
-newStateSequence = [];
-newProbSequence = [];
-newTime = [];
-for i = 1:length(time)
-    stateIndex = stateSequenceFinal(i);
-    tmpState = [stateIndex, stateIndex, stateIndex];
-    newStateSequence = [newStateSequence, tmpState];
-    
-    prob = probSequenceFinal(i);
-    tmpProb = [prob, prob, prob];
-    newProbSequence = [newProbSequence, tmpProb];
-    
-    tmpTime = [time(i)-0.05/3, time(i), time(i)+0.05/3]; % 0.05s is the original time step
-    newTime = [newTime, tmpTime];
-end
-newStateSequence = newStateSequence - 1;
-plot(newTime,newStateSequence,'-k','linewidth',2)
-
-ylabel('State Index');
-ylim([-0.5,5.5]);
-yticks(0:1:5);
-set(gca,'linewidth', 2,'fontsize',20,'fontname','Times New Roman');
-
-linkaxes([ax1,ax2,ax3],'x');
-%xlim([0,10]);
-xlabel(t,'Time Step','fontsize',20,'fontname','Times New Roman')
-xticklabels(ax1,{})
-xticklabels(ax2,{})
-t.TileSpacing = 'compact';
-t.Padding = 'compact';
-set(gcf,'unit','centimeters','position',[10 6 40 30]); 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% output data into files 
-% the x-axis, is time, time step is 0.05s 
-%mkdir outputData
-%cd("outputData")
-foldername = filename(1:(length(filename)-4));
-mkdir (foldername)
-cd(foldername)
-
-originalData = [time; ydata];
-writematrix(originalData,'originalData.txt')
-
-fittedData = [time; yfit];
-writematrix(fittedData,'fittedData.txt')
-
-stateSequence = [newTime; newStateSequence];
-writematrix(stateSequence,'stateSequence.txt')
-writematrix(newProbSequence,'probSequence.txt')
-
-writematrix(u,'systemStateFRET.txt')
-
-writematrix(sigma2,'systemStateCovariance.txt')
-
-writematrix(A,'transitionProbability.txt')
-
-cd ..
-
-
