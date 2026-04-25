@@ -20,12 +20,18 @@ if ~exist(baseOut, 'dir'), mkdir(baseOut); end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % initial parameters (same starting point for each condition)
-ug0 = [0.90 0.48 0.00];
-ub0 = [0.70 0.33 0.03];
-ur0 = [0.80 0.35 0.01];
-sigmag = [0.15, 0.12, 0.08];
-sigmab = [0.15, 0.18, 0.10];
-sigmar = [0.12, 0.17, 0.10];
+% Initial high/mid/low intensity levels per color, in raw count units.
+% These replaced the previous [0,1] FRET-scale guesses (e.g. ug0=[0.90 0.48 0.00])
+% after per-trace max-normalization was removed: the data now enters the EM in
+% raw counts, so the initial means and sigmas must be on the same scale.
+% Values derived from the typical condition-wide raw maxima (~430 green,
+% ~170 blue, ~310 red) scaled by the original FRET ratios.
+ug0 = [430 230 0];
+ub0 = [120  56 5];
+ur0 = [250 110 3];
+sigmag = [70, 60, 40];
+sigmab = [25, 30, 18];
+sigmar = [40, 55, 30];
 
 stateindex = [3 1 2 2 2 1
               3 3 1 2 3 3
@@ -42,7 +48,7 @@ PI0 = ones(1,stateNum) / stateNum;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % set rng once for reproducibility across all conditions
-rng(1234);
+rng(123);
 
 summaryRows = {};
 summaryRows{end+1} = sprintf('%-50s %8s %8s %14s %14s %14s %14s', ...
@@ -69,7 +75,11 @@ for c = 1:length(conditions)
     trainIdx = perm(1:nTrain);
     testIdx  = perm(nTrain+1:end);
 
-    % load all traces (normalize each by its own max, as in maincode.m)
+    % Load all traces. Note: per-trace max-normalization was intentionally
+    % removed. The raw data is already background-subtracted (zero-FRET
+    % baseline anchored near 0 across traces), so dividing each trace by
+    % its own max would introduce inconsistency between traces that visit
+    % different states.
     ydataAll = cell(1, nFiles);
     timeAll  = cell(1, nFiles);
     for k = 1:nFiles
@@ -78,9 +88,6 @@ for c = 1:length(conditions)
         timeAll{k} = t;
         yd = data(:,2:4)';
         yd(2,:) = data(:,4)'; yd(3,:) = data(:,3)';
-        yd(1,:) = yd(1,:) / max(yd(1,:));
-        yd(2,:) = yd(2,:) / max(yd(2,:));
-        yd(3,:) = yd(3,:) / max(yd(3,:));
         ydataAll{k} = yd;
     end
 

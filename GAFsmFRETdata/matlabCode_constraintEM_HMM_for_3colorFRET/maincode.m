@@ -24,9 +24,10 @@ for f = 1:length(filenames)
     yd = data(:,2:4)';
     yd(2,:) = data(:,4)'; yd(3,:) = data(:,3)';
     % now, the 1 row of yd is green, 2 row is blue, and 3 row is red!
-    yd(1,:) = yd(1,:) / max(yd(1,:));
-    yd(2,:) = yd(2,:) / max(yd(2,:));
-    yd(3,:) = yd(3,:) / max(yd(3,:));
+    % Note: per-trace max-normalization was intentionally removed. The raw
+    % data is already background-subtracted (zero-FRET baseline anchored
+    % near 0 across traces), so dividing each trace by its own max would
+    % introduce inconsistency between traces that visit different states.
     ydataAll{f} = yd;
 end
 %
@@ -35,12 +36,18 @@ end
 % expected states
 % first row is green, second row is blue, third row is red
 % estimation of FRET and covariance for each color fluorescence
-ug = [0.90 0.48 0.00]; % FRET of green
-ub = [0.70 0.33 0.03]; % FRET of blue
-ur = [0.80 0.35 0.01]; % FRET of red
-sigmag = [0.15, 0.12, 0.08];
-sigmab = [0.15, 0.18, 0.10];
-sigmar = [0.12, 0.17, 0.10];
+% Initial high/mid/low intensity levels per color, in raw count units.
+% These replaced the previous [0,1] FRET-scale guesses (e.g. ug=[0.90 0.48 0.00])
+% after per-trace max-normalization was removed: the data now enters the EM in
+% raw counts, so the initial means and sigmas must be on the same scale.
+% Values derived from the typical condition-wide raw maxima (~430 green,
+% ~170 blue, ~310 red) scaled by the original FRET ratios.
+ug = [430 230 0];   % green
+ub = [120  56 5];   % blue
+ur = [250 110 3];   % red
+sigmag = [70, 60, 40];
+sigmab = [25, 30, 18];
+sigmar = [40, 55, 30];
 
 % build the system states according to the couplings between states
 stateindex = [3 1 2 2 2 1
@@ -125,9 +132,7 @@ for f = 1:length(filenames)
     hold on
     plot(time, yfit(2,:),'b','linewidth',2)
     plot(time, yfit(3,:),'r','linewidth',2)
-    ylabel('Fitted-FRET');
-    ylim([-0.2,1]);
-    yticks(-0.2:0.2:1);
+    ylabel('Fitted intensity');
     set(gca,'linewidth', 2,'fontsize',20,'fontname','Times New Roman');
 
     % state sequence

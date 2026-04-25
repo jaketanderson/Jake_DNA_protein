@@ -199,7 +199,7 @@ while isConverged == false && tooManyIteration == false
     % update covariances
     for i = 1:Nstate
         sigmatmp = covAcc(:,:,i) / gamaSumT(i);
-        if sqrt(sigmatmp(1,1)) < 0.05 || sqrt(sigmatmp(2,2)) < 0.05 || sqrt(sigmatmp(3,3)) < 0.05 || det(sigmatmp) < 1.0e-9
+        if any(isnan(sigmatmp(:))) || any(isinf(sigmatmp(:))) || gamaSumT(i) < eps || sqrt(sigmatmp(1,1)) < 0.05 || sqrt(sigmatmp(2,2)) < 0.05 || sqrt(sigmatmp(3,3)) < 0.05 || det(sigmatmp) < 1.0e-9
             sigmatmp = sigma0(:,:,i);
         end
         sigma(:,:,i) = sigmatmp;
