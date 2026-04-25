@@ -11,7 +11,7 @@ stateNum = 6;
 % NOTE!: the paper shows blue before red color!
 
 % list of data files to train on
-filenames = {'hel3_trace_9.dat'};
+filenames = {'../expData_3colorFRET/expCondition_461/group1/hel1_trace_4.dat', '../expData_3colorFRET/expCondition_461/group1/hel2_trace_3.dat'};
 
 % read all traces into cell arrays
 ydataAll = cell(1, length(filenames));
@@ -88,6 +88,7 @@ set(gcf,'unit','centimeters','position',[10 6 20 13]);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Viterbi and output per trace
+baseDir = pwd;
 for f = 1:length(filenames)
     ydata = ydataAll{f};
     time  = timeAll{f};
@@ -165,6 +166,9 @@ for f = 1:length(filenames)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % output data into files
     foldername = filename(1:(length(filename)-4));
+    if exist(foldername, 'dir'),
+	    rmdir(foldername, 's');
+    end
     mkdir(foldername)
     cd(foldername)
 
@@ -182,5 +186,5 @@ for f = 1:length(filenames)
     writematrix(sigma2,'systemStateCovariance.txt')
     writematrix(A,'transitionProbability.txt')
 
-    cd ..
+    cd(baseDir)
 end
