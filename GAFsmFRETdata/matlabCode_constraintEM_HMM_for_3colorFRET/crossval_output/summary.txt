@@ -1,0 +1,5 @@
+condition                                            nTrain    nTest        trainLL         testLL      trainLL/T       testLL/T
+expCondition_461_group1                                  46       11    -59250.4405    -14730.0426     -15.931821     -15.838755
+expCondition_461_group2                                  46       11   -116620.0001    -23370.5614     -16.280888     -16.411911
+expCondition_SHL7                                        30        7    -54086.9418    -13871.2592     -15.515474     -15.361306
+expCondition_lowMg2                                      26        6    -81403.0158    -25208.6354     -15.837163     -16.628387

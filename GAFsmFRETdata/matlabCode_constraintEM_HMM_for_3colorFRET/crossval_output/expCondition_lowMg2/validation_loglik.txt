@@ -1,0 +1,41 @@
+condition: ../expData_3colorFRET/expCondition_lowMg2
+nTrain=26, nTest=6
+trainTotalT=5140, testTotalT=1516
+trainLogLik=-81403.015795, testLogLik=-25208.635420
+trainLogLik/T=-15.837163, testLogLik/T=-16.628387
+
+per-train-trace logLik:
+  ../expData_3colorFRET/expCondition_lowMg2/hel2_trace_23.dat	-2968.954380
+  ../expData_3colorFRET/expCondition_lowMg2/hel2_trace_7.dat	-3492.276198
+  ../expData_3colorFRET/expCondition_lowMg2/hel1_trace_39.dat	-1199.935219
+  ../expData_3colorFRET/expCondition_lowMg2/hel1_trace_19.dat	-2873.984793
+  ../expData_3colorFRET/expCondition_lowMg2/hel3_trace_5.dat	-8124.531938
+  ../expData_3colorFRET/expCondition_lowMg2/hel2_trace_32.dat	-1136.475005
+  ../expData_3colorFRET/expCondition_lowMg2/hel3_trace_10.dat	-4943.164545
+  ../expData_3colorFRET/expCondition_lowMg2/hel3_trace_7.dat	-3048.912524
+  ../expData_3colorFRET/expCondition_lowMg2/hel1_trace_11.dat	-1451.423826
+  ../expData_3colorFRET/expCondition_lowMg2/hel1_trace_12.dat	-3245.365311
+  ../expData_3colorFRET/expCondition_lowMg2/hel2_trace_11.dat	-3184.062533
+  ../expData_3colorFRET/expCondition_lowMg2/hel3_trace_23.dat	-2632.590986
+  ../expData_3colorFRET/expCondition_lowMg2/hel3_trace_29.dat	-1551.374868
+  ../expData_3colorFRET/expCondition_lowMg2/hel1_trace_3.dat	-2333.929324
+  ../expData_3colorFRET/expCondition_lowMg2/hel1_trace_29.dat	-1507.030028
+  ../expData_3colorFRET/expCondition_lowMg2/hel3_trace_31.dat	-3883.497574
+  ../expData_3colorFRET/expCondition_lowMg2/hel1_trace_35.dat	-1308.933524
+  ../expData_3colorFRET/expCondition_lowMg2/hel2_trace_21.dat	-845.970055
+  ../expData_3colorFRET/expCondition_lowMg2/hel1_trace_40.dat	-3092.846806
+  ../expData_3colorFRET/expCondition_lowMg2/hel1_trace_20.dat	-6046.276396
+  ../expData_3colorFRET/expCondition_lowMg2/hel1_trace_13.dat	-7860.461761
+  ../expData_3colorFRET/expCondition_lowMg2/hel1_trace_27.dat	-4671.847024
+  ../expData_3colorFRET/expCondition_lowMg2/hel2_trace_20.dat	-1579.852555
+  ../expData_3colorFRET/expCondition_lowMg2/hel2_trace_22.dat	-972.764882
+  ../expData_3colorFRET/expCondition_lowMg2/hel1_trace_33.dat	-1708.441670
+  ../expData_3colorFRET/expCondition_lowMg2/hel1_trace_10.dat	-5738.112071
+
+per-test-trace logLik:
+  ../expData_3colorFRET/expCondition_lowMg2/hel2_trace_1.dat	-3035.117500
+  ../expData_3colorFRET/expCondition_lowMg2/hel2_trace_29.dat	-2525.040207
+  ../expData_3colorFRET/expCondition_lowMg2/hel2_trace_27.dat	-2512.410420
+  ../expData_3colorFRET/expCondition_lowMg2/hel1_trace_21.dat	-1931.951664
+  ../expData_3colorFRET/expCondition_lowMg2/hel2_trace_3.dat	-4881.704847
+  ../expData_3colorFRET/expCondition_lowMg2/hel2_trace_16.dat	-10322.410781
