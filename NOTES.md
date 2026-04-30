@@ -11,3 +11,7 @@
     3. Those NERDSS results are converted to FRET intensity timeseries by code (to be written).
     4. A loss metric (to be defined, probably including length of traj. as well as HMM params) will give a score back to the optimizer.
 * How are we including HMM params in the loss function? I'm unsure. I guess this means we need to do the HMM work first.
+
+### April 30, 2026 meeting
+* Free params: on/off rates, h^2, D of prot in soln, D of N in 1D.
+* I need to schedule meetings with Yiben and Mankun.
