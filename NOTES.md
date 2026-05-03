@@ -1,4 +1,4 @@
-### April 15, 2026 meeting
+### April 15, 2026 meeting w/ Maggie
 * A trained HMM will give us a transition matrix and emission probabilities.
 * The "norm" in NERDSS is a mathematical tool allowing us to define dihedrals in special cases. I think we won't need to set it to anything other than \[0,0,1\].
 * The main work to be done in the world of HMMs is:
@@ -12,6 +12,11 @@
     4. A loss metric (to be defined, probably including length of traj. as well as HMM params) will give a score back to the optimizer.
 * How are we including HMM params in the loss function? I'm unsure. I guess this means we need to do the HMM work first.
 
-### April 30, 2026 meeting
+### April 30, 2026 meeting w/ Maggie
 * Free params: on/off rates, h^2, D of prot in soln, D of N in 1D.
 * I need to schedule meetings with Yiben and Mankun.
+
+### May 3, 2026 meeting w/ Mankun
+* When you do 1D diffusion, use isPromoter. For the specific binding site, translational and rotation diffusion constants should be fully zero.
+* 1D diffusion of A binding to N = (1/D_A + 1/D+N)**1 where D_A is the 3D diffusion of A
+* TFs should not be able to bypass one another. To prevent this, we should set up a "reference" point with a reaction
